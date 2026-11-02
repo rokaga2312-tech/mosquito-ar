@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Mosquito en Realidad Aumentada</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Atkinson+Hyperlegible:wght@400;700&display=swap">
+<style>
+  /* Layout: cartel de advertencia amarillo arriba, visor 3D grande al centro, pasos breves debajo */
+  :root {
+    --bg: #FBFBF7;
+    --surface: #FFFFFF;
+    --ink: #161613;
+    --muted: #5B5A50;
+    --warn: #FFD400;
+    --alarm: #C8102E;
+    --line: #E4E2D6;
+    --stage: #EFEEE6;
+    --display: "Archivo Black", "Arial Black", Impact, sans-serif;
+    --body: "Atkinson Hyperlegible", "Segoe UI", Arial, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) { --bg: #121210; --surface: #1C1C19; --ink: #F3F2EA; --muted: #B4B2A4; --line: #34332D; --stage: #22221E; --alarm: #FF5A6B; color-scheme: dark; }
+  }
+  :root[data-theme="dark"] { --bg: #121210; --surface: #1C1C19; --ink: #F3F2EA; --muted: #B4B2A4; --line: #34332D; --stage: #22221E; --alarm: #FF5A6B; color-scheme: dark; }
+
+  body { background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 17px; line-height: 1.5; }
+  .wrap { max-width: 880px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+
+  .band { background: var(--warn); color: #161613; border-bottom: 6px solid #161613; }
+  .band .wrap { padding-block: 22px 20px; display: flex; gap: 18px; align-items: center; }
+  .tri { flex: none; width: 64px; height: 56px; }
+  .band h1 { font-family: var(--display); font-weight: 400; font-size: clamp(26px, 6vw, 44px); line-height: 1.02; margin: 0; letter-spacing: 0.005em; text-wrap: balance; }
+  .band h1 span { color: #B00D24; }
+  .band p { margin: 6px 0 0; font-weight: 700; font-size: 15px; letter-spacing: 0.06em; text-transform: uppercase; }
+
+  main .wrap { padding-block: 22px 40px; display: grid; gap: 22px; }
+  .viewer { position: relative; background: var(--stage); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
+  model-viewer { width: 100%; height: min(68vh, 560px); min-height: 340px; background: transparent; --poster-color: transparent; }
+  .ar-btn { position: absolute; left: 50%; bottom: 18px; transform: translateX(-50%); display: inline-flex; align-items: center; gap: 10px; background: #B00D24; color: #fff; border: 3px solid #161613; border-radius: 999px; padding: 16px 26px; font: 700 19px var(--body); box-shadow: 0 6px 18px rgba(0,0,0,.25); cursor: pointer; white-space: nowrap; }
+  .ar-btn:focus-visible { outline: 3px solid var(--alarm); outline-offset: 3px; }
+  .hint { position: absolute; top: 12px; left: 12px; right: 12px; margin: 0; font-size: 14px; color: var(--muted); text-align: center; pointer-events: none; }
+  .noar { position: absolute; left: 12px; right: 12px; bottom: 14px; margin: 0; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; font-size: 14px; color: var(--muted); }
+
+  h2 { font-family: var(--display); font-weight: 400; font-size: 24px; margin: 0 0 10px; text-wrap: balance; }
+  .steps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+  .step { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; min-width: 0; }
+  .step b { display: block; font-family: var(--display); font-weight: 400; font-size: 20px; color: var(--alarm); }
+  .step p { margin: 4px 0 0; font-size: 15px; }
+  .how { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px; }
+  .how ol { margin: 0; padding-left: 22px; display: grid; gap: 6px; }
+  .how small { display: block; margin-top: 10px; color: var(--muted); font-size: 14px; }
+  .cta { display: inline-flex; align-items: center; gap: 8px; background: var(--warn); color: #161613; font-weight: 700; text-decoration: none; padding: 12px 18px; border-radius: 10px; border: 2px solid #161613; width: fit-content; }
+  .cta:focus-visible { outline: 3px solid var(--alarm); outline-offset: 3px; }
+  footer { color: var(--muted); font-size: 14px; }
+  @media (max-width: 640px) { .steps { grid-template-columns: 1fr; } .tri { width: 48px; height: 42px; } }
+</style>
+</head>
+<body>
+<header class="band">
+  <div class="wrap">
+    <svg class="tri" viewBox="0 0 64 56" aria-hidden="true"><path d="M32 3 L61 53 H3 Z" fill="#161613"/><path d="M32 13 L52 47 H12 Z" fill="#FFD400"/><rect x="29" y="22" width="6" height="15" fill="#161613"/><circle cx="32" cy="42" r="3.3" fill="#161613"/></svg>
+    <div>
+      <h1>¡Aquí puede proliferar <span>el mosquito!</span></h1>
+      <p>Campaña contra el dengue · Aedes aegypti</p>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="wrap">
+    <section class="viewer" aria-label="Mosquito Aedes aegypti en 3D">
+      <model-viewer id="mv" src="mosquito.glb" alt="Mosquito Aedes aegypti en 3D, con patas rayadas de blanco y negro, bajo un cartel amarillo que dice: aquí puede proliferar el mosquito"
+        ar ar-modes="scene-viewer quick-look webxr" ar-scale="auto" ar-placement="floor"
+        camera-controls touch-action="pan-y" auto-rotate auto-rotate-delay="1500" rotation-per-second="18deg"
+        camera-orbit="35deg 72deg auto" shadow-intensity="1" exposure="1.05" interaction-prompt="auto">
+        <button slot="ar-button" class="ar-btn" id="ar-btn">
+          <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2 3 7v10l9 5 9-5V7l-9-5Zm0 2.3 6.6 3.7L12 11.7 5.4 8 12 4.3ZM5 9.7l6 3.4v6.6l-6-3.4V9.7Zm8 10v-6.6l6-3.4v6.6l-6 3.4Z" fill="currentColor"/></svg>
+          Ver el mosquito en mi lugar
+        </button>
+      </model-viewer>
+      <p class="hint">Girá el mosquito con el dedo. Pellizcá para acercarte.</p>
+      <p class="noar" id="noar" hidden>Este dispositivo no permite realidad aumentada desde aquí. Igual podés girar y acercar el modelo 3D. Probá desde un celular Android o iPhone.</p>
+    </section>
+
+    <section>
+      <h2>Para que no nazcan más mosquitos</h2>
+      <div class="steps">
+        <div class="step"><b>Vaciá</b><p>Todo recipiente que junte agua: baldes, botellas, cubiertas, latas.</p></div>
+        <div class="step"><b>Tapá</b><p>Tanques, aljibes y bidones, siempre bien cerrados.</p></div>
+        <div class="step"><b>Cepillá</b><p>Las paredes de floreros y bebederos: ahí quedan pegados los huevos.</p></div>
+      </div>
+    </section>
+
+    <section class="how">
+      <h2>Cómo verlo en realidad aumentada</h2>
+      <ol>
+        <li>Tocá el botón rojo <b>Ver el mosquito en mi lugar</b>.</li>
+        <li>Se abre la cámara: mové el celular despacio apuntando al piso o a una mesa.</li>
+        <li>Cuando aparezca el mosquito, podés caminar alrededor y sacarle una foto.</li>
+      </ol>
+      <small>Funciona en la mayoría de los celulares Android con Google Play Services para RA y en iPhone con iOS 12 o posterior. Si no aparece el botón, el modelo 3D igual se puede girar en pantalla.</small>
+    </section>
+
+    <a class="cta" id="app-link" href="#" hidden>Más información de la campaña →</a>
+    <footer>El mosquito del modelo mide unos 27 cm para que se vea bien. En la realidad mide menos de 1 cm.</footer>
+  </div>
+</main>
+
+<script type="module" src="https://cdn.jsdelivr.net/npm/@google/model-viewer@3.5.0/dist/model-viewer.min.js"></script>
+<script>
+  const APP_URL = "campana.html";
+  if (APP_URL) { const a = document.getElementById("app-link"); a.href = APP_URL; a.hidden = false; }
+  const mv = document.getElementById("mv");
+  mv.addEventListener("load", () => {
+    if (!mv.canActivateAR) { document.getElementById("noar").hidden = false; }
+  });
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) mv.removeAttribute("auto-rotate");
+</script>
+</body>
+</html>
